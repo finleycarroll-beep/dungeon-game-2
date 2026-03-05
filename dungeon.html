@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dungeon Crawler</title>
+
+<style>
+body{
+    background:black;
+    color:#00ff9d;
+    font-family:monospace;
+}
+
+#game{
+    white-space:pre;
+    font-size:18px;
+    line-height:18px;
+}
+
+#stats{
+    margin-top:10px;
+}
+
+button{
+    margin:4px;
+    padding:10px;
+    background:#111;
+    color:white;
+    border:1px solid #00ff9d;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Dungeon Crawler</h1>
+
+<div id="game"></div>
+
+<div id="stats"></div>
+
+<div>
+<button onclick="move(0,-1)">↑</button><br>
+<button onclick="move(-1,0)">←</button>
+<button onclick="move(1,0)">→</button><br>
+<button onclick="move(0,1)">↓</button>
+</div>
+
+<button onclick="attack()">Attack</button>
+<button onclick="fireball()">Fireball</button>
+<button onclick="potion()">Potion</button>
+
+<script>
+
+const size = 15
+
+let player={
+x:7,
+y:7,
+hp:30,
+mp:10,
+gold:0,
+weapon:"Sword"
+}
+
+let monsters=[
+{x:3,y:4,hp:10,name:"Goblin"},
+{x:10,y:10,hp:18,name:"Orc"},
+{x:12,y:3,hp:30,name:"Dragon"}
+]
+
+let potions=2
+
+function draw(){
+
+let grid=""
+
+for(let y=0;y<size;y++){
+
+for(let x=0;x<size;x++){
+
+let drawn=false
+
+if(player.x===x && player.y===y){
+grid+="P"
+drawn=true
+}
+
+for(let m of monsters){
+if(m.x===x && m.y===y && m.hp>0){
+grid+="M"
+drawn=true
+}
+}
+
+if(!drawn) grid+="."
+
+}
+
+grid+="\n"
+}
+
+document.getElementById("game").textContent=grid
+
+document.getElementById("stats").innerHTML=
+"HP:"+player.hp+
+" MP:"+player.mp+
+" Gold:"+player.gold+
+" Potions:"+potions
+}
+
+function move(dx,dy){
+
+player.x+=dx
+player.y+=dy
+
+player.x=Math.max(0,Math.min(size-1,player.x))
+player.y=Math.max(0,Math.min(size-1,player.y))
+
+monsterTurn()
+
+draw()
+
+}
+
+function getMonster(){
+
+for(let m of monsters){
+if(m.x===player.x && m.y===player.y && m.hp>0){
+return m
+}
+}
+
+return null
+}
+
+function attack(){
+
+let m=getMonster()
+
+if(!m){
+alert("No enemy here")
+return
+}
+
+m.hp-=5
+
+if(m.hp<=0){
+alert(m.name+" defeated!")
+player.gold+=10
+}else{
+alert("You hit "+m.name)
+}
+
+monsterTurn()
+
+draw()
+
+}
+
+function fireball(){
+
+if(player.mp<3){
+alert("Not enough mana")
+return
+}
+
+player.mp-=3
+
+let m=getMonster()
+
+if(m){
+m.hp-=10
+alert("Fireball hits "+m.name)
+}
+
+monsterTurn()
+
+draw()
+
+}
+
+function potion(){
+
+if(potions<=0){
+alert("No potions")
+return
+}
+
+potions--
+
+player.hp+=10
+
+draw()
+
+}
+
+function monsterTurn(){
+
+for(let m of monsters){
+
+if(m.hp<=0) continue
+
+if(Math.abs(m.x-player.x)+Math.abs(m.y-player.y)<=1){
+
+player.hp-=3
+
+if(player.hp<=0){
+alert("Game Over!")
+location.reload()
+}
+
+}
+
+}
+
+}
+
+draw()
+
+</script>
+
+</body>
+</html>
